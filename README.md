@@ -1,2 +1,4 @@
-# certgen
-Dockerized certificate generation for OpenELIS services
+# CertGen
+
+Dockerized certificate generation for OpenELIS services.
+
