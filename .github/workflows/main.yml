@@ -55,6 +55,7 @@ jobs:
           images: ${{ env.DOCKER_NAME }}
 
       - name: Build Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
