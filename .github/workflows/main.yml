@@ -59,8 +59,8 @@ jobs:
         with:
           context: .
           platforms: linux/${{ matrix.platform }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          # push: true
+          # tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.DOCKER_NAME }}:${{ matrix.platform }}-buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_NAME }}:${{ matrix.platform }}-buildcache,mode=max
