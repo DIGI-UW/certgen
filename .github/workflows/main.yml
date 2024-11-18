@@ -62,19 +62,20 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{github.repository}}:latest
-          cache-to: type=inline
+          cache-from: type=registry,ref=${{ env.DOCKER_NAME }}:${{ matrix.platform }}-buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_NAME }}:${{ matrix.platform }}-buildcache,mode=max
+          outputs: type=image,name=${{ env.DOCKER_NAME }},push-by-digest=true,name-canonical=true,push=true
 
       - name: Export digest
         run: |
-          mkdir -p /tmp/digests/backend
+          mkdir -p /tmp/digests/certgen
           digest="${{ steps.build.outputs.digest }}"
-          touch "/tmp/digests/backend/${digest#sha256:}"
+          touch "/tmp/digests/certgen/${digest#sha256:}"
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
           name: digests-${{ env.PLATFORM_PAIR_CERTS }}
-          path: /tmp/digests/backend/*
+          path: /tmp/digests/certgen/*
           if-no-files-found: error
           retention-days: 1    
 
@@ -86,7 +87,7 @@ jobs:
       - name: Download digests
         uses: actions/download-artifact@v4
         with:
-          path: /tmp/digests/backend
+          path: /tmp/digests/certgen
           pattern: digests-*
           merge-multiple: true
 
@@ -106,7 +107,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Create manifest list and push
-        working-directory: /tmp/digests/backend
+        working-directory: /tmp/digests/certgen
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
             $(printf '${{ env.DOCKER_NAME }}@sha256:%s ' *)
