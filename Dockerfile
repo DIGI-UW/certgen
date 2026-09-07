@@ -27,9 +27,16 @@ RUN apt-get update && apt-get upgrade -y && \
 # expired, certificate). The heavy apt layer above stays cached.
 ARG CACHEBUST=0
 
+# Validity of the self-signed certificate, in days. X.509 has no "never expires":
+# every certificate carries a notAfter date, so this uses one that will not come
+# around in practice (100 years). Override at build time if a shorter life is
+# wanted, e.g. Safari and iOS refuse TLS server certificates valid for more than
+# 825 days: --build-arg CERT_VALIDITY_DAYS=825
+ARG CERT_VALIDITY_DAYS=36500
+
 # Self-signed Certs
-RUN echo "cachebust=${CACHEBUST}" && \
-    openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt \
+RUN echo "cachebust=${CACHEBUST} validity_days=${CERT_VALIDITY_DAYS}" && \
+    openssl req -x509 -nodes -days ${CERT_VALIDITY_DAYS} -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt \
     -subj "/C=US/ST=WA/L=Seattle/O=I-TECH-UW/OU=DIGI/CN=localhost" \
     -addext "subjectAltName=DNS:*.openelis.org,DNS:*.openelis-global.org"
 

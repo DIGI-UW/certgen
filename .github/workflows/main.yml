@@ -5,8 +5,9 @@ on:
     branches: [ 'main' ]
   release:
     types: [ 'published' ]
-  # Rebuild monthly so the 365-day self-signed cert in the published image is
-  # always renewed long before it expires.
+  # Rebuild monthly so the published image keeps a fresh base layer. The
+  # self-signed certificate itself is valid for 100 years (CERT_VALIDITY_DAYS in
+  # the Dockerfile), so this is no longer what keeps it from expiring.
   schedule:
     - cron: '0 3 1 * *'
   workflow_dispatch:
